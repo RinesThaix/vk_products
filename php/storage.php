@@ -6,8 +6,12 @@
  * Time: 0:37
  */
 
-const PER_PAGE = 20;
+const PER_PAGE = 100;
 
+/**
+ * Creates one new product of random configuration
+ * @param $db_connection mysqli database connection
+ */
 function create_random_product($db_connection)
 {
     $id = rand(1000000, 9999999);
@@ -19,6 +23,10 @@ function create_random_product($db_connection)
     print_alert('Новый товар успешно создан и будет отображен на странице после обновления кеша.');
 }
 
+/**
+ * Creates one million random products of random configurations
+ * @param $db_connection mysqli database connection
+ */
 function create_them_all($db_connection)
 {
     for ($j = 0; $j < 1000; ++$j) {
@@ -39,12 +47,24 @@ function create_them_all($db_connection)
     }
 }
 
+/**
+ * Used to delete a random product, but in reality removes the one with lowest id
+ * @param $db_connection mysqli database connection
+ */
 function delete_random_product($db_connection)
 {
     $db_connection->query("DELETE FROM products LIMIT 1");
     print_alert('Один из существующих товаров удален. Он исчезнет из таблицы после обновления кеша.');
 }
 
+/**
+ * Gets all products on the given page
+ * @param $memcached Memcached memcached instance
+ * @param $db_connection mysqli database connection
+ * @param $num_rows int number of rows (products) in database
+ * @param $page_id int identifier of the current page (starts from 0)
+ * @return mixed it's an array of products
+ */
 function get_products_on_page($memcached, $db_connection, $num_rows, $page_id)
 {
     $page = $memcached->get("page" . $page_id);
@@ -61,6 +81,12 @@ function get_products_on_page($memcached, $db_connection, $num_rows, $page_id)
     }
 }
 
+/**
+ * Retrieves amount of rows (products) in database
+ * @param $memcached Memcached memcached instance
+ * @param $db_connection mysqli database connection
+ * @return int amount of rows (products) in database
+ */
 function retrieveProductsAmountInDatabase($memcached, $db_connection)
 {
     $rows = $memcached->get('rows-count');
@@ -74,6 +100,10 @@ function retrieveProductsAmountInDatabase($memcached, $db_connection)
     }
 }
 
+/**
+ * Internal function to create alerts
+ * @param $message string the message to be printed
+ */
 function print_alert($message) {
     echo "<script type='text/javascript'>alert('" . $message . "');</script>";
 }

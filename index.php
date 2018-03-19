@@ -39,7 +39,7 @@ include "php/params_checker.php";
     </thead>
     <tbody>
         <?php
-        print_current_page($memcached, $db_connection, $current_page);
+        print_page($memcached, $db_connection, $current_page);
         ?>
     </tbody>
 </table>
