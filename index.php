@@ -8,7 +8,7 @@
 include "db.php";
 include "mem.php";
 
-$per_page = 20;
+const PER_PAGE = 20;
 $selected_page = 0;
 
 if(isset($_GET['create'])) {
@@ -54,10 +54,10 @@ function retrieveRowsCount($memcached, $db_connection) {
  * @param $page_id int начиная с 0
  * @return mixed|null
  */
-function get_products_on_page($memcached, $db_connection, $per_page, $num_rows, $page_id) {
+function get_products_on_page($memcached, $db_connection, $num_rows, $page_id) {
     $page = $memcached->get("page" . $page_id);
     if($page === FALSE) {
-        $result = $db_connection->query('SELECT * FROM products WHERE id < ' . ($num_rows - $page_id * $per_page) . ' ORDER BY id DESC LIMIT ' . $per_page);
+        $result = $db_connection->query('SELECT * FROM products WHERE id < ' . ($num_rows - $page_id * PER_PAGE) . ' ORDER BY id DESC LIMIT ' . PER_PAGE);
         $rows = $result->fetch_all();
         if($memcached->set("page" . $page_id, $rows, 60) === FALSE) {
             echo '!! Could not save to MemCached !!</br></br>';
@@ -101,7 +101,7 @@ function delete_random_product($db_connection) {
     $db_connection->query("DELETE FROM products LIMIT 1");
 }
 
-list_products(get_products_on_page($memcached, $db_connection, $per_page, retrieveRowsCount($memcached, $db_connection), $selected_page));
+list_products(get_products_on_page($memcached, $db_connection, retrieveRowsCount($memcached, $db_connection), $selected_page));
 
 echo '<html>
 <form action="index.php" method="get">

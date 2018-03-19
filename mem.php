@@ -6,7 +6,7 @@
  * Time: 16:26
  */
 
-$mem_host = "localhost";
-$mem_port = 11211;
+const MEM_HOST = "localhost";
+const MEM_PORT = 11211;
 $memcached = new Memcached();
-$memcached->addServer($mem_host, $mem_port);
+$memcached->addServer(MEM_HOST, MEM_PORT);
