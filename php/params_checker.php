@@ -8,20 +8,20 @@
 
 include "printer.php";
 
-if (isset($_GET['create'])) {
+if (isset($_POST['create'])) {
     create_random_product($db_connection);
 }
 
-if (isset($_GET['remove'])) {
+if (isset($_POST['remove'])) {
     delete_random_product($db_connection);
 }
 
 $current_page = 0;
 
-if (isset($_GET['page'])) {
-    $current_page = $_GET['page'];
-} else if (isset($_GET['curpage'])) {
-    $current_page = $_GET['curpage'];
+if (isset($_POST['page'])) {
+    $current_page = $_POST['page'];
+} else if (isset($_POST['curpage'])) {
+    $current_page = $_POST['curpage'];
 }
 
 if ($current_page < 0)

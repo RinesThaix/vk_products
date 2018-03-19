@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Table V04</title>
+    <title>Vk Products</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
@@ -16,7 +16,7 @@ include "php/params_checker.php";
 </br>
 
 <center>
-    <form action="index.php" method="get">
+    <form action="index.php" method="POST">
         <button name="create" class="btn btn-success" value="" type="submit">Создать новый товар</button>
         <button name="remove" class="btn btn-danger" value="" type="submit">Удалить существующий</button>
         <input type="hidden" name="curpage" value="<?= $current_page ?>"/>
@@ -24,11 +24,10 @@ include "php/params_checker.php";
         <button name="page" class="btn btn-info" value="<?= $current_page + 1 ?>" type="submit">Следующая страница</button>
         <input type="submit" class="btn btn-primary" name="refresh" value="Обновить страницу"/>
     </form>
-</center>
 
 </br>
 
-<table class="table">
+<table class="table" style="width: 90%">
     <thead class="thead-dark">
         <tr>
             <th scope="col">ID</th>
@@ -44,6 +43,8 @@ include "php/params_checker.php";
         ?>
     </tbody>
 </table>
+
+</center>
 
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"

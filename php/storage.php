@@ -16,6 +16,7 @@ function create_random_product($db_connection)
     $price = rand(100, 999);
     $url = "https://vk.com/product/" . $id;
     $db_connection->query("INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
+    print_alert('Новый товар успешно создан и будет отображен на странице после обновления кеша.');
 }
 
 function create_them_all($db_connection)
@@ -41,6 +42,7 @@ function create_them_all($db_connection)
 function delete_random_product($db_connection)
 {
     $db_connection->query("DELETE FROM products LIMIT 1");
+    print_alert('Один из существующих товаров удален. Он исчезнет из таблицы после обновления кеша.');
 }
 
 function get_products_on_page($memcached, $db_connection, $num_rows, $page_id)
@@ -54,7 +56,7 @@ function get_products_on_page($memcached, $db_connection, $num_rows, $page_id)
         }
         return $rows;
     } else {
-        echo "<script type='text/javascript'>alert('Retrieved data from memcached');</script>";
+//        echo "<script type='text/javascript'>alert('Retrieved data from memcached');</script>";
         return $page;
     }
 }
@@ -70,4 +72,8 @@ function retrieveProductsAmountInDatabase($memcached, $db_connection)
     } else {
         return $rows;
     }
+}
+
+function print_alert($message) {
+    echo "<script type='text/javascript'>alert('" . $message . "');</script>";
 }
