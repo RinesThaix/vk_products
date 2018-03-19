@@ -76,7 +76,7 @@ function get_products_on_page($page_id) {
 
 function create_random_product() {
     global $db_connection;
-    $id = rand(100000, 999999);
+    $id = rand(1000000, 9999999);
     $name = "Продукт #" . $id;
     $description = "Описание продукта #" . $id;
     $price = rand(100, 999);
@@ -84,11 +84,32 @@ function create_random_product() {
     $db_connection->query("INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
 }
 
+function create_them_all() {
+    global $db_connection;
+    for($j = 0; $j < 1000; ++$j) {
+        $query = 'INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ';
+        for($i = 0; $i < 1000; ++$i) {
+            $id = rand(1000000, 9999999);
+            $name = "Продукт #" . $id;
+            $description = "Описание продукта #" . $id;
+            $price = rand(100, 999);
+            $url = "https://vk.com/product/" . $id;
+            $query .= "('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')";
+            if($i < 999)
+                $query .= ', ';
+            else
+                $query .= ';';
+        }
+        $db_connection->query($query);
+    }
+}
+
 function delete_random_product() {
     global $db_connection;
     $db_connection->query("DELETE FROM products LIMIT 1");
 }
 
+//create_them_all();
 list_products(get_products_on_page($selected_page));
 
 echo '<html>
