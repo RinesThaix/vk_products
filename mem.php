@@ -7,6 +7,6 @@
  */
 
 $mem_host = "localhost";
-$mem_port = 8000;
+$mem_port = 11211;
 $memcached = new Memcached();
 $memcached->addServer($mem_host, $mem_port);

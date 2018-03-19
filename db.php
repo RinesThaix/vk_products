@@ -8,8 +8,8 @@
 
 $db_host = "localhost";
 $db_port = 3306;
-$db_user = "root";
-$db_pass = "root";
+$db_user = "vk";
+$db_pass = "vkpass";
 $db_name = "vk_test";
 $db_connection = mysqli_connect($db_host, $db_user, $db_pass, $db_name, $db_port);
 

@@ -1,6 +1,6 @@
 CREATE DATABASE vk_test;
 
-CREATE TABLE `products` (
+CREATE TABLE vk_test.`products` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
   `description` text(0) NOT NULL,

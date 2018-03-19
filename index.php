@@ -9,7 +9,7 @@ include "db.php";
 include "mem.php";
 
 $num_rows = retrieveRowsCount();
-$per_page = 10;
+$per_page = 20;
 $selected_page = 0;
 
 if(isset($_GET['create'])) {
@@ -24,9 +24,13 @@ if(isset($_GET['remove'])) {
 
 if(isset($_GET['page'])) {
     $selected_page = $_GET['page'];
-    if($selected_page < 0)
-        $selected_page = 0;
+}else if(isset($_GET['curpage'])) {
+    $selected_page = $_GET['curpage'];
 }
+
+
+if($selected_page < 0)
+    $selected_page = 0;
 
 function list_products($products_array) {
     foreach ($products_array as $product) {
@@ -42,7 +46,7 @@ function retrieveRowsCount() {
         global $db_connection;
         $rows = $db_connection->query("SELECT COUNT(*) FROM products");
         $result = $rows->fetch_assoc()['COUNT(*)'];
-        $memcached->set('rows-count', $result, 5);
+        $memcached->set('rows-count', $result, 30);
         return $result;
     }else {
         return $rows;
@@ -60,7 +64,7 @@ function get_products_on_page($page_id) {
         global $per_page, $db_connection, $num_rows;
         $result = $db_connection->query('SELECT * FROM products WHERE id < ' . ($num_rows - $page_id * $per_page) . ' ORDER BY id DESC LIMIT ' . $per_page);
         $rows = $result->fetch_all();
-        if($memcached->set("page" . $page_id, $rows, 10) === FALSE) {
+        if($memcached->set("page" . $page_id, $rows, 60) === FALSE) {
             echo '!! Could not save to MemCached !!</br></br>';
         }
         return $rows;
@@ -77,12 +81,12 @@ function create_random_product() {
     $description = "Описание продукта #" . $id;
     $price = rand(100, 999);
     $url = "https://vk.com/product/" . $id;
-    $db_connection->query("INSERT DELAYED INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
+    $db_connection->query("INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
 }
 
 function delete_random_product() {
     global $db_connection;
-    $db_connection->query("DELETE DELAYED FROM products LIMIT 1");
+    $db_connection->query("DELETE FROM products LIMIT 1");
 }
 
 list_products(get_products_on_page($selected_page));
@@ -91,7 +95,7 @@ echo '<html>
 <form action="index.php" method="get">
     <button name="create" value="" type="submit">Создать новый товар</button>
     <button name="remove" value="" type="submit">Удалить существующий</button>
-    <input type="hidden" name="page" value="' . $selected_page . '"/>
+    <input type="hidden" name="curpage" value="' . $selected_page . '"/>
     <button name="page" value="' . ($selected_page - 1) . '" type="submit">Предыдущая страница</button>
     <button name="page" value="' . ($selected_page + 1) . '" type="submit">Следующая страница</button>
     <input type="submit" class="button" name="refresh" value="Обновить страницу" />
