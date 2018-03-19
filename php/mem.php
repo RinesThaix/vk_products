@@ -7,6 +7,6 @@
  */
 
 const MEM_HOST = "localhost";
-const MEM_PORT = 11211;
+const MEM_PORT = 8000;
 $memcached = new Memcached();
 $memcached->addServer(MEM_HOST, MEM_PORT);
