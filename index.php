@@ -8,17 +8,16 @@
 include "db.php";
 include "mem.php";
 
-$num_rows = retrieveRowsCount();
 $per_page = 20;
 $selected_page = 0;
 
 if(isset($_GET['create'])) {
-    create_random_product();
+    create_random_product($db_connection);
     echo 'Новый продукт создан!</br></br>';
 }
 
 if(isset($_GET['remove'])) {
-    delete_random_product();
+    delete_random_product($db_connection);
     echo 'Существующий товар удален!</br></br>';
 }
 
@@ -39,11 +38,9 @@ function list_products($products_array) {
     echo '</br>';
 }
 
-function retrieveRowsCount() {
-    global $memcached;
+function retrieveRowsCount($memcached, $db_connection) {
     $rows = $memcached->get('rows-count');
     if($rows === FALSE) {
-        global $db_connection;
         $rows = $db_connection->query("SELECT COUNT(*) FROM products");
         $result = $rows->fetch_assoc()['COUNT(*)'];
         $memcached->set('rows-count', $result, 30);
@@ -57,11 +54,9 @@ function retrieveRowsCount() {
  * @param $page_id int начиная с 0
  * @return mixed|null
  */
-function get_products_on_page($page_id) {
-    global $memcached;
+function get_products_on_page($memcached, $db_connection, $per_page, $num_rows, $page_id) {
     $page = $memcached->get("page" . $page_id);
     if($page === FALSE) {
-        global $per_page, $db_connection, $num_rows;
         $result = $db_connection->query('SELECT * FROM products WHERE id < ' . ($num_rows - $page_id * $per_page) . ' ORDER BY id DESC LIMIT ' . $per_page);
         $rows = $result->fetch_all();
         if($memcached->set("page" . $page_id, $rows, 60) === FALSE) {
@@ -74,8 +69,7 @@ function get_products_on_page($page_id) {
     }
 }
 
-function create_random_product() {
-    global $db_connection;
+function create_random_product($db_connection) {
     $id = rand(1000000, 9999999);
     $name = "Продукт #" . $id;
     $description = "Описание продукта #" . $id;
@@ -84,8 +78,7 @@ function create_random_product() {
     $db_connection->query("INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
 }
 
-function create_them_all() {
-    global $db_connection;
+function create_them_all($db_connection) {
     for($j = 0; $j < 1000; ++$j) {
         $query = 'INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ';
         for($i = 0; $i < 1000; ++$i) {
@@ -104,13 +97,11 @@ function create_them_all() {
     }
 }
 
-function delete_random_product() {
-    global $db_connection;
+function delete_random_product($db_connection) {
     $db_connection->query("DELETE FROM products LIMIT 1");
 }
 
-//create_them_all();
-list_products(get_products_on_page($selected_page));
+list_products(get_products_on_page($memcached, $db_connection, $per_page, retrieveRowsCount($memcached, $db_connection), $selected_page));
 
 echo '<html>
 <form action="index.php" method="get">
