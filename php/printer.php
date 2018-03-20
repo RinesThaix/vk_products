@@ -18,7 +18,7 @@ include "storage.php";
  */
 function print_page($memcached, $db_connection, $current_page_id)
 {
-    print_products(get_products_on_page($memcached, $db_connection, retrieveProductsAmountInDatabase($memcached, $db_connection), $current_page_id));
+    print_products(get_products_on_page($memcached, $db_connection, $current_page_id));
 }
 
 /**
