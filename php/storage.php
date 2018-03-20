@@ -75,8 +75,7 @@ function get_products_on_page($memcached, $db_connection, $page_id)
 {
     $page = $memcached->get("page" . $page_id);
     if ($page === FALSE) {
-        $max = $db_connection->query("SELECT MAX(id) FROM products")->fetch_assoc()['MAX(id)'];
-        $result = $db_connection->query('SELECT * FROM products WHERE id < ' . ($max - $page_id * PER_PAGE) . ' ORDER BY id DESC LIMIT ' . PER_PAGE);
+        $result = $db_connection->query('SELECT * FROM products WHERE id <= (SELECT MAX(id) FROM products) - ' . ($page_id * PER_PAGE) . ' ORDER BY id DESC LIMIT ' . PER_PAGE);
         $rows = $result->fetch_all();
         if ($memcached->set("page" . $page_id, $rows, 600) === FALSE) {
             echo "<script type='text/javascript'>alert('Could not save data to memcached!!');</script>";
