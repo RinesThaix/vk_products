@@ -8,3 +8,9 @@ CREATE TABLE vk_test.`products` (
   `url` varchar(64) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED;
+
+CREATE TABLE vk_test.`products_meta` (
+  `meta_key` varchar(16) NOT NULL,
+  `meta_value` int(10) NOT NULL,
+  PRIMARY KEY (`meta_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPRESSED;

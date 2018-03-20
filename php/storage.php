@@ -6,13 +6,14 @@
  * Time: 0:37
  */
 
-const PER_PAGE = 100;
+const PER_PAGE = 250;
 
 /**
  * Creates one new product of random configuration
+ * @param $memcached Memcached memcached instance
  * @param $db_connection mysqli database connection
  */
-function create_random_product($db_connection)
+function create_random_product($memcached, $db_connection)
 {
     $id = rand(1000000, 9999999);
     $name = "Продукт #" . $id;
@@ -20,14 +21,18 @@ function create_random_product($db_connection)
     $price = rand(100, 999);
     $url = "https://vk.com/product/" . $id;
     $db_connection->query("INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
-    print_alert('Новый товар успешно создан и будет отображен на странице после обновления кеша.');
+    $num_rows = retrieveProductsAmountInDatabase($memcached, $db_connection);
+    invalidate_cache($memcached);
+    updateProductsAmountInDatabase($num_rows, $memcached, $db_connection, 1);
+    print_alert('Новый товар успешно создан, кеш инвалидирован.');
 }
 
 /**
  * Creates one million random products of random configurations
+ * @param $memcached Memcached memcached instance
  * @param $db_connection mysqli database connection
  */
-function create_them_all($db_connection)
+function create_them_all($memcached, $db_connection)
 {
     for ($j = 0; $j < 1000; ++$j) {
         $query = 'INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ';
@@ -45,16 +50,24 @@ function create_them_all($db_connection)
         }
         $db_connection->query($query);
     }
+    $num_rows = retrieveProductsAmountInDatabase($memcached, $db_connection);
+    invalidate_cache($memcached);
+    updateProductsAmountInDatabase($num_rows, $memcached, $db_connection, 1000000);
+    print_alert('Готово!');
 }
 
 /**
  * Used to delete a random product, but in reality removes the one with lowest id
+ * @param $memcached Memcached memcached instance
  * @param $db_connection mysqli database connection
  */
-function delete_random_product($db_connection)
+function delete_random_product($memcached, $db_connection)
 {
     $db_connection->query("DELETE FROM products LIMIT 1");
-    print_alert('Один из существующих товаров удален. Он исчезнет из таблицы после обновления кеша.');
+    $num_rows = retrieveProductsAmountInDatabase($memcached, $db_connection);
+    invalidate_cache($memcached);
+    updateProductsAmountInDatabase($num_rows, $memcached, $db_connection, -1);
+    print_alert('Один из существующих товаров удален, кеш инвалидирован.');
 }
 
 /**
@@ -71,12 +84,11 @@ function get_products_on_page($memcached, $db_connection, $num_rows, $page_id)
     if ($page === FALSE) {
         $result = $db_connection->query('SELECT * FROM products WHERE id < ' . ($num_rows - $page_id * PER_PAGE) . ' ORDER BY id DESC LIMIT ' . PER_PAGE);
         $rows = $result->fetch_all();
-        if ($memcached->set("page" . $page_id, $rows, 60) === FALSE) {
+        if ($memcached->set("page" . $page_id, $rows, 600) === FALSE) {
             echo "<script type='text/javascript'>alert('Could not save data to memcached!!');</script>";
         }
         return $rows;
     } else {
-//        echo "<script type='text/javascript'>alert('Retrieved data from memcached');</script>";
         return $page;
     }
 }
@@ -91,13 +103,39 @@ function retrieveProductsAmountInDatabase($memcached, $db_connection)
 {
     $rows = $memcached->get('rows-count');
     if ($rows === FALSE) {
+//        $max = $db_connection->query("SELECT id FROM products ORDER BY id DESC LIMIT 1");
+//        $max = $max->fetch_assoc()['id'];
+//        $min = $db_connection->query("SELECT id FROM products ORDER BY id ASC LIMIT 1");
+//        $min = $min->fetch_assoc()['id'];
+//        $result = $max - $min + 1;
         $rows = $db_connection->query("SELECT COUNT(*) FROM products");
         $result = $rows->fetch_assoc()['COUNT(*)'];
-        $memcached->set('rows-count', $result, 30);
+        updateProductsAmountInDatabase($result, $memcached, $db_connection, 0);
         return $result;
     } else {
         return $rows;
     }
+}
+
+/**
+ * Updates memcached for products amount in database
+ * @param $rows int current number of products in database
+ * @param $memcached Memcached memcached instance
+ * @param $db_connection mysqli database connection
+ * @param $delta int indicator of how much number of products changed
+ */
+function updateProductsAmountInDatabase($rows = -1, $memcached, $db_connection, $delta) {
+    if($rows === -1)
+        $rows = retrieveProductsAmountInDatabase($memcached, $db_connection);
+    $memcached->set('rows-count', $rows + $delta, 120);
+}
+
+/**
+ * Invalidates all data from memcached
+ * @param $memcached Memcached memcached instance
+ */
+function invalidate_cache($memcached) {
+    $memcached->flush();
 }
 
 /**

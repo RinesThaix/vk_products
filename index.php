@@ -16,7 +16,7 @@ include "php/params_checker.php";
 </br>
 
 <center>
-    <form action="index.php" method="POST">
+    <form action="index.php" method="GET">
         <button name="create" class="btn btn-success" value="" type="submit">Создать новый товар</button>
         <button name="remove" class="btn btn-danger" value="" type="submit">Удалить существующий</button>
         <input type="hidden" name="curpage" value="<?= $current_page ?>"/>
