@@ -48,3 +48,11 @@ function print_product($product)
         </tr>
     ';
 }
+
+/**
+ * Internal function to create alerts
+ * @param $message string the message to be printed
+ */
+function print_alert($message) {
+    echo "<script type='text/javascript'>alert('" . $message . "');</script>";
+}

@@ -10,14 +10,17 @@ include "printer.php";
 
 if (isset($_GET['create'])) {
     create_random_product($memcached, $db_connection);
+    print_alert('Новый товар успешно создан, кеш инвалидирован.');
 }
 
 if (isset($_GET['create-all'])) {
     create_them_all($memcached, $db_connection);
+    print_alert('Готово!');
 }
 
 if (isset($_GET['remove'])) {
     delete_random_product($memcached, $db_connection);
+    print_alert('Один из существующих товаров удален, кеш инвалидирован.');
 }
 
 $current_page = 0;

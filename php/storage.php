@@ -22,7 +22,6 @@ function create_random_product($memcached, $db_connection)
     $url = "https://vk.com/product/" . $id;
     $db_connection->query("INSERT INTO products (`name`, `description`, `price`, `url`) VALUES ('" . $name . "', '" . $description . "', " . $price . ", '" . $url . "')");
     invalidate_cache($memcached);
-    print_alert('Новый товар успешно создан, кеш инвалидирован.');
 }
 
 /**
@@ -49,7 +48,6 @@ function create_them_all($memcached, $db_connection)
         $db_connection->query($query);
     }
     invalidate_cache($memcached);
-    print_alert('Готово!');
 }
 
 /**
@@ -61,7 +59,6 @@ function delete_random_product($memcached, $db_connection)
 {
     $db_connection->query("DELETE FROM products LIMIT 1");
     invalidate_cache($memcached);
-    print_alert('Один из существующих товаров удален, кеш инвалидирован.');
 }
 
 /**
@@ -77,9 +74,7 @@ function get_products_on_page($memcached, $db_connection, $page_id)
     if ($page === FALSE) {
         $result = $db_connection->query('SELECT * FROM products WHERE id <= (SELECT MAX(id) FROM products) - ' . ($page_id * PER_PAGE) . ' ORDER BY id DESC LIMIT ' . PER_PAGE);
         $rows = $result->fetch_all();
-        if ($memcached->set("page" . $page_id, $rows, 600) === FALSE) {
-            echo "<script type='text/javascript'>alert('Could not save data to memcached!!');</script>";
-        }
+        $memcached->set("page" . $page_id, $rows, 600);
         return $rows;
     } else {
         return $page;
@@ -92,12 +87,4 @@ function get_products_on_page($memcached, $db_connection, $page_id)
  */
 function invalidate_cache($memcached) {
     $memcached->flush();
-}
-
-/**
- * Internal function to create alerts
- * @param $message string the message to be printed
- */
-function print_alert($message) {
-    echo "<script type='text/javascript'>alert('" . $message . "');</script>";
 }
